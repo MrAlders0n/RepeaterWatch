@@ -168,8 +168,8 @@
         tbody.innerHTML = '';
         packets.forEach(function (p) {
             var tr = document.createElement('tr');
-            var raw = p.raw_hex || p.hash || '--';
-            var truncated = raw.length > 16 ? raw.substring(0, 16) + '\u2026' : raw;
+            var raw = p.raw_hex || '';
+            var display = raw.length > 20 ? raw.substring(0, 20) + '...' : (raw || '--');
             tr.innerHTML =
                 '<td>' + formatTime(p.ts) + '</td>' +
                 '<td class="dir-' + (p.direction || '').toLowerCase() + '">' + (p.direction || '--') + '</td>' +
@@ -178,17 +178,19 @@
                 '<td>' + (p.snr != null ? p.snr.toFixed(1) : '--') + '</td>' +
                 '<td>' + (p.rssi != null ? p.rssi.toFixed(0) : '--') + '</td>' +
                 '<td>' + (p.score != null ? p.score.toFixed(2) : '--') + '</td>' +
-                '<td class="pkt-hex" title="Click to copy full packet">' + truncated + '</td>';
-            if (raw !== '--') {
-                (function (hexCell, fullHex, shortHex) {
-                    hexCell.addEventListener('click', function () {
-                        copyText(fullHex);
-                        hexCell.textContent = 'Copied!';
-                        setTimeout(function () { hexCell.textContent = shortHex; }, 1000);
-                    });
-                })(tr.querySelector('.pkt-hex'), raw, truncated);
-            }
+                '<td class="pkt-hex" data-raw="' + raw + '" title="Click to copy full packet">' + display + '</td>';
             tbody.appendChild(tr);
+        });
+
+        tbody.addEventListener('click', function (e) {
+            var cell = e.target.closest('.pkt-hex');
+            if (!cell) return;
+            var full = cell.getAttribute('data-raw');
+            if (!full) return;
+            var saved = cell.textContent;
+            copyText(full);
+            cell.textContent = 'Copied!';
+            setTimeout(function () { cell.textContent = saved; }, 1000);
         });
     }
 
