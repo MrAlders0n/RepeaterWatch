@@ -66,7 +66,7 @@ var AirtimeChart = (function () {
                 top: 0,
             },
             xAxis: { type: 'time' },
-            yAxis: { type: 'value', name: '%', max: 100 },
+            yAxis: { type: 'value', name: '%' },
             dataZoom: [
                 { type: 'inside', xAxisIndex: 0 },
                 { type: 'slider', xAxisIndex: 0, height: 20, bottom: 5 },
