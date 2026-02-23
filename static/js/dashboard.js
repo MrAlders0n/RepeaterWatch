@@ -243,6 +243,16 @@
         });
     }
 
+    function setupMapFullscreen() {
+        var card = document.getElementById('map-card');
+        var btn = document.getElementById('map-fullscreen');
+        btn.addEventListener('click', function () {
+            card.classList.toggle('fullscreen');
+            btn.textContent = card.classList.contains('fullscreen') ? '\u2715' : '\u26F6';
+            setTimeout(function () { NeighborMap.invalidateSize(); }, 100);
+        });
+    }
+
     // ── Resize ───────────────────────────────────────────
 
     var resizeTimeout;
@@ -264,6 +274,7 @@
     refreshAll();
     setupTimeButtons();
     setupThemeToggle();
+    setupMapFullscreen();
 
     refreshTimer = setInterval(refreshAll, REFRESH_INTERVAL);
 })();
