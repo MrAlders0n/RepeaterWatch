@@ -250,6 +250,7 @@ td.dir-rx { color: var(--green); }
     font-size: 0.8rem;
     cursor: pointer;
     opacity: 0.7;
+    min-width: 180px;
 }
 .pkt-hex:hover { opacity: 1; }
 
