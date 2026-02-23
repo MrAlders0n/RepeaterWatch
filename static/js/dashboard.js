@@ -256,10 +256,19 @@
     var fwPollTimer = null;
 
     function setupFirmwareFlash() {
+        var panel = document.getElementById('firmware-panel');
+        var toggleBtn = document.getElementById('flash-firmware-btn');
         var fileInput = document.getElementById('fw-file');
         var fileLabel = document.getElementById('fw-file-name');
         var hashInput = document.getElementById('fw-sha256');
         var flashBtn = document.getElementById('fw-flash-btn');
+
+        // Toggle panel visibility
+        toggleBtn.addEventListener('click', function () {
+            var open = panel.style.display !== 'none';
+            panel.style.display = open ? 'none' : 'block';
+            toggleBtn.classList.toggle('active', !open);
+        });
 
         fileInput.addEventListener('change', function () {
             if (fileInput.files.length > 0) {
@@ -304,6 +313,13 @@
                     showFwStatus('error', 'Network error: ' + err.message);
                     flashBtn.disabled = false;
                 });
+        });
+    }
+
+    function setupRebootRadio() {
+        // Placeholder — will be wired to a relay GPIO endpoint in the future
+        document.getElementById('reboot-radio-btn').addEventListener('click', function () {
+            alert('Reboot Radio is not yet implemented. A relay-based hard reboot will be added in a future update.');
         });
     }
 
@@ -367,6 +383,7 @@
     setupThemeToggle();
     setupMapFullscreen();
     setupFirmwareFlash();
+    setupRebootRadio();
 
     refreshTimer = setInterval(refreshAll, REFRESH_INTERVAL);
 })();

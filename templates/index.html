@@ -18,8 +18,28 @@
         <div class="header-right">
             <span id="uptime-display">Uptime: --</span>
             <span class="status-dot" id="status-dot" title="Collector status"></span>
+            <button id="reboot-radio-btn" class="header-btn reboot-btn" title="Reboot Radio (coming soon)" disabled>Reboot Radio</button>
+            <button id="flash-firmware-btn" class="header-btn flash-btn" title="Flash Firmware">Flash Firmware</button>
         </div>
     </header>
+
+    <!-- Firmware Flash Panel (hidden by default) -->
+    <div id="firmware-panel" class="firmware-panel" style="display:none;">
+        <div class="firmware-panel-inner">
+            <div class="firmware-inputs">
+                <label class="firmware-file-label">
+                    <span id="fw-file-name">Choose firmware .zip</span>
+                    <input type="file" id="fw-file" accept=".zip" />
+                </label>
+                <input type="text" id="fw-sha256" placeholder="Expected SHA256 hash" spellcheck="false" />
+                <button id="fw-flash-btn" class="flash-btn" disabled>Flash</button>
+            </div>
+            <div id="fw-status" class="fw-status" style="display:none;">
+                <span id="fw-status-text"></span>
+            </div>
+            <pre id="fw-log" class="fw-log" style="display:none;"></pre>
+        </div>
+    </div>
 
     <!-- Time Range Selector -->
     <nav id="time-controls">
@@ -108,25 +128,6 @@
                 </thead>
                 <tbody id="packets-tbody"></tbody>
             </table>
-        </div>
-    </div>
-
-    <!-- Firmware Update -->
-    <div class="full-width-card" id="firmware-card">
-        <h3>Firmware Update</h3>
-        <div class="firmware-form">
-            <div class="firmware-inputs">
-                <label class="firmware-file-label">
-                    <span id="fw-file-name">Choose firmware .zip</span>
-                    <input type="file" id="fw-file" accept=".zip" />
-                </label>
-                <input type="text" id="fw-sha256" placeholder="Expected SHA256 hash" spellcheck="false" />
-                <button id="fw-flash-btn" class="flash-btn" disabled>Flash Firmware</button>
-            </div>
-            <div id="fw-status" class="fw-status" style="display:none;">
-                <span id="fw-status-text"></span>
-            </div>
-            <pre id="fw-log" class="fw-log" style="display:none;"></pre>
         </div>
     </div>
 

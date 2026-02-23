@@ -332,8 +332,49 @@ footer strong {
     color: var(--accent);
 }
 
-/* Firmware Flash */
-.firmware-form {
+/* Header Action Buttons */
+.header-btn {
+    padding: 4px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: background 0.15s, opacity 0.15s;
+    border: none;
+    color: #fff;
+}
+
+.header-btn.flash-btn {
+    background: #e65100;
+}
+
+.header-btn.flash-btn:hover {
+    background: #bf360c;
+}
+
+.header-btn.flash-btn.active {
+    background: #bf360c;
+    box-shadow: 0 0 0 2px rgba(230,81,0,0.4);
+}
+
+.header-btn.reboot-btn {
+    background: rgba(255,255,255,0.15);
+}
+
+.header-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+/* Firmware Flash Panel */
+.firmware-panel {
+    background: var(--bg-card);
+    border-bottom: 2px solid #e65100;
+    padding: 12px 20px;
+}
+
+.firmware-panel-inner {
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -387,7 +428,7 @@ footer strong {
     color: var(--text-muted);
 }
 
-.flash-btn {
+.firmware-panel .flash-btn {
     background: #e65100;
     color: #fff;
     border: none;
@@ -400,11 +441,11 @@ footer strong {
     transition: background 0.15s;
 }
 
-.flash-btn:hover:not(:disabled) {
+.firmware-panel .flash-btn:hover:not(:disabled) {
     background: #bf360c;
 }
 
-.flash-btn:disabled {
+.firmware-panel .flash-btn:disabled {
     opacity: 0.4;
     cursor: not-allowed;
 }
