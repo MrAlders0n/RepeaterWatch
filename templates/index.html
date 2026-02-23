@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MeshCore Repeater Monitor</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+</head>
+<body>
+    <!-- Header -->
+    <header id="header">
+        <div class="header-left">
+            <h1 id="device-name">MeshCore Repeater</h1>
+            <span class="badge" id="firmware-badge">--</span>
+            <span class="badge" id="board-badge">--</span>
+        </div>
+        <div class="header-right">
+            <span id="uptime-display">Uptime: --</span>
+            <span class="status-dot" id="status-dot" title="Collector status"></span>
+        </div>
+    </header>
+
+    <!-- Time Range Selector -->
+    <nav id="time-controls">
+        <button class="time-btn" data-hours="1">1h</button>
+        <button class="time-btn active" data-hours="6">6h</button>
+        <button class="time-btn" data-hours="24">24h</button>
+        <button class="time-btn" data-hours="168">7d</button>
+        <button class="time-btn" data-hours="720">30d</button>
+        <span id="last-update">--</span>
+    </nav>
+
+    <!-- Charts Grid -->
+    <div class="charts-grid">
+        <div class="chart-card">
+            <h3>Battery Voltage</h3>
+            <div id="chart-battery" class="chart-container"></div>
+        </div>
+        <div class="chart-card">
+            <h3>Noise Floor</h3>
+            <div id="chart-radio" class="chart-container"></div>
+        </div>
+        <div class="chart-card" id="card-voltage">
+            <h3>INA3221 Voltage</h3>
+            <div id="chart-voltage" class="chart-container"></div>
+        </div>
+        <div class="chart-card" id="card-current">
+            <h3>INA3221 Current</h3>
+            <div id="chart-current" class="chart-container"></div>
+        </div>
+        <div class="chart-card" id="card-power">
+            <h3>INA3221 Power</h3>
+            <div id="chart-power" class="chart-container"></div>
+        </div>
+        <div class="chart-card">
+            <h3>Airtime Utilization</h3>
+            <div id="chart-airtime" class="chart-container"></div>
+        </div>
+        <div class="chart-card">
+            <h3>Packets TX / RX</h3>
+            <div id="chart-packets" class="chart-container"></div>
+        </div>
+        <div class="chart-card">
+            <h3>Neighbor Count</h3>
+            <div id="chart-neighbors" class="chart-container"></div>
+        </div>
+    </div>
+
+    <!-- Neighbor Map -->
+    <div class="full-width-card">
+        <h3>Neighbor Map</h3>
+        <div id="neighbor-map"></div>
+    </div>
+
+    <!-- Recent Packets Table -->
+    <div class="full-width-card">
+        <h3>Recent Packets</h3>
+        <div class="table-scroll">
+            <table id="packets-table">
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Dir</th>
+                        <th>SNR</th>
+                        <th>RSSI</th>
+                        <th>Score</th>
+                        <th>Hash</th>
+                        <th>Path</th>
+                    </tr>
+                </thead>
+                <tbody id="packets-tbody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer id="footer">
+        <span>Queue: <strong id="footer-queue">--</strong></span>
+        <span>Errors: <strong id="footer-errors">--</strong></span>
+        <span>DB: <strong id="footer-db-size">--</strong></span>
+        <span>Polls: <strong id="footer-polls">--</strong></span>
+        <button id="theme-toggle" title="Toggle dark/light mode">Toggle Theme</button>
+    </footer>
+
+    <!-- JS Libraries from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/theme/dark.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- App JS -->
+    <script src="/static/js/charts/battery.js"></script>
+    <script src="/static/js/charts/radio.js"></script>
+    <script src="/static/js/charts/power.js"></script>
+    <script src="/static/js/charts/packets.js"></script>
+    <script src="/static/js/charts/neighbors.js"></script>
+    <script src="/static/js/map.js"></script>
+    <script src="/static/js/dashboard.js"></script>
+</body>
+</html>

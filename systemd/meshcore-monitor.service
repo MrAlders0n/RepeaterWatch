@@ -1,0 +1,16 @@
+[Unit]
+Description=MeshCore Repeater Pi Monitor
+After=network.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/opt/meshcore-monitor
+ExecStart=/opt/meshcore-monitor/venv/bin/python app.py
+Restart=always
+RestartSec=10
+Environment=MESHCORE_SERIAL_PORT=/dev/ttyV0
+Environment=MESHCORE_DB_PATH=/opt/meshcore-monitor/meshcore.db
+
+[Install]
+WantedBy=multi-user.target
