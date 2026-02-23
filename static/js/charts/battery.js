@@ -8,15 +8,15 @@ var BatteryChart = (function () {
             xAxis: { type: 'time' },
             yAxis: {
                 type: 'value',
-                name: 'mV',
-                min: function (v) { return Math.floor(v.min / 100) * 100; },
+                name: 'V',
+                min: function (v) { return Math.floor(v.min * 10) / 10; },
             },
             dataZoom: [
                 { type: 'inside', xAxisIndex: 0 },
                 { type: 'slider', xAxisIndex: 0, height: 20, bottom: 5 },
             ],
             series: [{
-                name: 'Battery',
+                name: 'Repeater Voltage',
                 type: 'line',
                 smooth: true,
                 symbol: 'none',
@@ -33,7 +33,7 @@ var BatteryChart = (function () {
         if (!chart) return;
         var series = [];
         for (var i = 0; i < data.timestamps.length; i++) {
-            series.push([data.timestamps[i] * 1000, data.battery_mv[i]]);
+            series.push([data.timestamps[i] * 1000, data.ch2_voltage[i]]);
         }
         chart.setOption({ series: [{ data: series }] });
     }

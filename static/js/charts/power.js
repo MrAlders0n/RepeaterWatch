@@ -3,8 +3,8 @@ var PowerCharts = (function () {
     var currentChart = null;
     var powerChart = null;
 
-    var CH_COLORS = ['#00b4d8', '#06d6a0', '#ffd166'];
-    var CH_NAMES = ['CH0', 'CH1', 'CH2'];
+    var CH_COLORS = ['#ffd166', '#00b4d8'];
+    var CH_NAMES = ['Solar', 'Repeater'];
 
     function makeOption(yName) {
         return {
@@ -48,7 +48,10 @@ var PowerCharts = (function () {
         if (!voltageChart) return;
 
         var hasData = data.timestamps.length > 0;
-        var hasExtpower = hasData && data.ch0_voltage.some(function (v) { return v !== null; });
+        var hasExtpower = hasData && (
+            data.ch1_voltage.some(function (v) { return v !== null; }) ||
+            data.ch2_voltage.some(function (v) { return v !== null; })
+        );
 
         // Toggle visibility of INA3221 cards
         ['card-voltage', 'card-current', 'card-power'].forEach(function (id) {
@@ -60,21 +63,19 @@ var PowerCharts = (function () {
 
         if (!hasExtpower) return;
 
-        var voltageSeries = [[], [], []];
-        var currentSeries = [[], [], []];
-        var powerSeries = [[], [], []];
+        // Solar = ch1 (device channel 2), Repeater = ch2 (device channel 3)
+        var voltageSeries = [[], []];
+        var currentSeries = [[], []];
+        var powerSeries = [[], []];
 
         for (var i = 0; i < data.timestamps.length; i++) {
             var t = data.timestamps[i] * 1000;
-            voltageSeries[0].push([t, data.ch0_voltage[i]]);
-            voltageSeries[1].push([t, data.ch1_voltage[i]]);
-            voltageSeries[2].push([t, data.ch2_voltage[i]]);
-            currentSeries[0].push([t, data.ch0_current[i]]);
-            currentSeries[1].push([t, data.ch1_current[i]]);
-            currentSeries[2].push([t, data.ch2_current[i]]);
-            powerSeries[0].push([t, data.ch0_power[i]]);
-            powerSeries[1].push([t, data.ch1_power[i]]);
-            powerSeries[2].push([t, data.ch2_power[i]]);
+            voltageSeries[0].push([t, data.ch1_voltage[i]]);
+            voltageSeries[1].push([t, data.ch2_voltage[i]]);
+            currentSeries[0].push([t, data.ch1_current[i]]);
+            currentSeries[1].push([t, data.ch2_current[i]]);
+            powerSeries[0].push([t, data.ch1_power[i]]);
+            powerSeries[1].push([t, data.ch2_power[i]]);
         }
 
         voltageChart.setOption({

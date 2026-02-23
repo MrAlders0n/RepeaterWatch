@@ -59,16 +59,13 @@
             document.getElementById('uptime-display').textContent = 'Uptime: ' + formatUptime(d.uptime_secs);
         }).catch(noop);
 
-        fetchJSON('/api/v1/stats/battery?hours=' + h).then(function (d) {
+        fetchJSON('/api/v1/stats/power?hours=' + h).then(function (d) {
             BatteryChart.update(d);
+            PowerCharts.update(d);
         }).catch(noop);
 
         fetchJSON('/api/v1/stats/radio?hours=' + h).then(function (d) {
             RadioChart.update(d);
-        }).catch(noop);
-
-        fetchJSON('/api/v1/stats/power?hours=' + h).then(function (d) {
-            PowerCharts.update(d);
         }).catch(noop);
 
         fetchJSON('/api/v1/stats/airtime?hours=' + h).then(function (d) {
@@ -99,11 +96,6 @@
             document.getElementById('footer-errors').textContent = d.error_count || 0;
             document.getElementById('footer-db-size').textContent = formatBytes(d.db_size_bytes);
             document.getElementById('footer-polls').textContent = d.poll_count || 0;
-        }).catch(noop);
-
-        // Update footer queue from latest core stats
-        fetchJSON('/api/v1/stats/battery?hours=1').then(function (d) {
-            // we don't have queue in battery endpoint but we can use status
         }).catch(noop);
 
         document.getElementById('last-update').textContent = 'Updated: ' + new Date().toLocaleTimeString();
