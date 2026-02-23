@@ -152,10 +152,6 @@ header {
     height: 260px;
 }
 
-.chart-card.hidden {
-    display: none;
-}
-
 /* Full Width Cards */
 .full-width-card {
     background: var(--bg-card);

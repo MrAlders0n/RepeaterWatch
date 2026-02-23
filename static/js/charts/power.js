@@ -46,22 +46,7 @@ var PowerCharts = (function () {
 
     function update(data) {
         if (!voltageChart) return;
-
-        var hasData = data.timestamps.length > 0;
-        var hasExtpower = hasData && (
-            data.ch1_voltage.some(function (v) { return v !== null; }) ||
-            data.ch2_voltage.some(function (v) { return v !== null; })
-        );
-
-        // Toggle visibility of INA3221 cards
-        ['card-voltage', 'card-current', 'card-power'].forEach(function (id) {
-            var el = document.getElementById(id);
-            if (el) {
-                el.classList.toggle('hidden', !hasExtpower);
-            }
-        });
-
-        if (!hasExtpower) return;
+        if (!data.timestamps.length) return;
 
         // Solar = ch1 (device channel 2), Repeater = ch2 (device channel 3)
         var voltageSeries = [[], []];
