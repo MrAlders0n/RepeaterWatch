@@ -1,4 +1,9 @@
 import os
+from pathlib import Path
+
+from dotenv import load_dotenv
+
+load_dotenv(Path(__file__).resolve().parent / ".env")
 
 SERIAL_PORT = os.environ.get("MESHCORE_SERIAL_PORT", "/dev/ttyV0")
 SERIAL_BAUD = int(os.environ.get("MESHCORE_SERIAL_BAUD", "115200"))
