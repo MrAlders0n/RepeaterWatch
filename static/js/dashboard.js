@@ -5,6 +5,9 @@
     var refreshTimer = null;
     var REFRESH_INTERVAL = 60000;
 
+    var activeTab = 'meshcore';
+    var chartsInitialized = false;
+
     // ── Theme ────────────────────────────────────────────
 
     function getTheme() {
@@ -30,6 +33,53 @@
         AirtimeChart.init(document.getElementById('chart-airtime'));
         PacketsChart.init(document.getElementById('chart-packets'));
         NeighborMap.init(document.getElementById('neighbor-map'));
+        chartsInitialized = true;
+    }
+
+    function resizeCharts() {
+        RadioChart.resize();
+        PowerCharts.resize();
+        AirtimeChart.resize();
+        PacketsChart.resize();
+        NeighborMap.invalidateSize();
+    }
+
+    // ── Tabs ─────────────────────────────────────────────
+
+    function setupTabs() {
+        var tabBtns = document.querySelectorAll('.tab-btn');
+        tabBtns.forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var tabId = btn.getAttribute('data-tab');
+                if (tabId === activeTab) return;
+
+                // Update button states
+                tabBtns.forEach(function (b) { b.classList.remove('active'); });
+                btn.classList.add('active');
+
+                // Update panel states
+                document.querySelectorAll('.tab-panel').forEach(function (p) {
+                    p.classList.remove('active');
+                });
+                document.getElementById('tab-' + tabId).classList.add('active');
+
+                activeTab = tabId;
+                onTabActivated(tabId);
+            });
+        });
+    }
+
+    function onTabActivated(tabId) {
+        if (tabId === 'meshcore') {
+            if (!chartsInitialized) {
+                initCharts();
+            }
+            // Charts need a resize after becoming visible
+            setTimeout(function () {
+                resizeCharts();
+            }, 50);
+            refreshMeshCore();
+        }
     }
 
     // ── API Fetchers ─────────────────────────────────────
@@ -41,16 +91,28 @@
         });
     }
 
-    function refreshAll() {
-        var h = currentHours;
-
-        var deviceReady = fetchJSON('/api/v1/device').then(function (d) {
+    function refreshHeader() {
+        fetchJSON('/api/v1/device').then(function (d) {
             document.getElementById('device-name').textContent = d.name || 'MeshCore Repeater';
             document.getElementById('firmware-badge').textContent = d.firmware || '--';
             document.getElementById('board-badge').textContent = d.board || '--';
             document.getElementById('uptime-display').textContent = formatUptime(d.uptime_secs);
             NeighborMap.setRepeaterInfo(d);
         }).catch(noop);
+
+        fetchJSON('/api/v1/status').then(function (d) {
+            var dot = document.getElementById('status-dot');
+            dot.classList.toggle('connected', d.serial_connected);
+            dot.title = d.serial_connected ? 'Connected to ' + d.serial_port : 'Disconnected';
+            document.getElementById('footer-queue').textContent = '--';
+            document.getElementById('footer-errors').textContent = d.error_count || 0;
+            document.getElementById('footer-db-size').textContent = formatBytes(d.db_size_bytes);
+            document.getElementById('footer-polls').textContent = d.poll_count || 0;
+        }).catch(noop);
+    }
+
+    function refreshMeshCore() {
+        var h = currentHours;
 
         fetchJSON('/api/v1/stats/power?hours=' + h).then(function (d) {
             PowerCharts.update(d);
@@ -73,25 +135,22 @@
             return d;
         }).catch(function () { return []; });
 
-        Promise.all([deviceReady, neighborsReady]).then(function (results) {
-            NeighborMap.update(results[1]);
+        neighborsReady.then(function (neighbors) {
+            NeighborMap.update(neighbors);
         });
 
         fetchJSON('/api/v1/packets/recent?limit=50').then(function (d) {
             renderPacketsTable(d);
         }).catch(noop);
 
-        fetchJSON('/api/v1/status').then(function (d) {
-            var dot = document.getElementById('status-dot');
-            dot.classList.toggle('connected', d.serial_connected);
-            dot.title = d.serial_connected ? 'Connected to ' + d.serial_port : 'Disconnected';
-            document.getElementById('footer-queue').textContent = '--';
-            document.getElementById('footer-errors').textContent = d.error_count || 0;
-            document.getElementById('footer-db-size').textContent = formatBytes(d.db_size_bytes);
-            document.getElementById('footer-polls').textContent = d.poll_count || 0;
-        }).catch(noop);
-
         document.getElementById('last-update').textContent = 'Updated: ' + new Date().toLocaleTimeString();
+    }
+
+    function refreshAll() {
+        refreshHeader();
+        if (activeTab === 'meshcore') {
+            refreshMeshCore();
+        }
     }
 
     function bucketForHours(h) {
@@ -227,7 +286,7 @@
                 buttons.forEach(function (b) { b.classList.remove('active'); });
                 btn.classList.add('active');
                 currentHours = parseInt(btn.getAttribute('data-hours'), 10);
-                refreshAll();
+                refreshMeshCore();
             });
         });
     }
@@ -236,8 +295,12 @@
         document.getElementById('theme-toggle').addEventListener('click', function () {
             var next = getTheme() === 'dark' ? 'light' : 'dark';
             applyTheme(next);
-            initCharts();
-            refreshAll();
+            if (activeTab === 'meshcore') {
+                initCharts();
+                refreshMeshCore();
+            } else {
+                chartsInitialized = false;
+            }
         });
     }
 
@@ -256,19 +319,10 @@
     var fwPollTimer = null;
 
     function setupFirmwareFlash() {
-        var panel = document.getElementById('firmware-panel');
-        var toggleBtn = document.getElementById('flash-firmware-btn');
         var fileInput = document.getElementById('fw-file');
         var fileLabel = document.getElementById('fw-file-name');
         var hashInput = document.getElementById('fw-sha256');
         var flashBtn = document.getElementById('fw-flash-btn');
-
-        // Toggle panel visibility
-        toggleBtn.addEventListener('click', function () {
-            var open = panel.style.display !== 'none';
-            panel.style.display = open ? 'none' : 'block';
-            toggleBtn.classList.toggle('active', !open);
-        });
 
         fileInput.addEventListener('change', function () {
             if (fileInput.files.length > 0) {
@@ -317,7 +371,6 @@
     }
 
     function setupRebootRadio() {
-        // Placeholder — will be wired to a relay GPIO endpoint in the future
         document.getElementById('reboot-radio-btn').addEventListener('click', function () {
             alert('Reboot Radio is not yet implemented. A relay-based hard reboot will be added in a future update.');
         });
@@ -367,17 +420,16 @@
     window.addEventListener('resize', function () {
         clearTimeout(resizeTimeout);
         resizeTimeout = setTimeout(function () {
-            RadioChart.resize();
-            PowerCharts.resize();
-            AirtimeChart.resize();
-            PacketsChart.resize();
-            NeighborMap.invalidateSize();
+            if (activeTab === 'meshcore' && chartsInitialized) {
+                resizeCharts();
+            }
         }, 200);
     });
 
     // ── Boot ─────────────────────────────────────────────
 
     applyTheme(getTheme());
+    setupTabs();
     initCharts();
     refreshAll();
     setupTimeButtons();

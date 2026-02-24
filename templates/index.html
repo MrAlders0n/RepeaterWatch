@@ -18,117 +18,151 @@
             <span class="badge" id="board-badge">--</span>
             <span class="badge badge-uptime" id="uptime-display">--</span>
         </div>
-        <div class="header-actions">
-            <button id="flash-firmware-btn" class="header-btn flash-btn" title="Flash Firmware">Flash Firmware</button>
-            <button id="reboot-radio-btn" class="header-btn reboot-btn" title="Reboot Radio (coming soon)" disabled>Reboot Radio</button>
-        </div>
     </header>
 
-    <!-- Firmware Flash Panel (hidden by default) -->
-    <div id="firmware-panel" class="firmware-panel" style="display:none;">
-        <div class="firmware-panel-inner">
-            <div class="firmware-inputs">
-                <label class="firmware-file-label">
-                    <span id="fw-file-name">Choose firmware .zip</span>
-                    <input type="file" id="fw-file" accept=".zip" />
-                </label>
-                <input type="text" id="fw-sha256" placeholder="Expected SHA256 hash" spellcheck="false" />
-                <button id="fw-flash-btn" class="flash-btn" disabled>Flash</button>
-            </div>
-            <div id="fw-status" class="fw-status" style="display:none;">
-                <span id="fw-status-text"></span>
-            </div>
-            <pre id="fw-log" class="fw-log" style="display:none;"></pre>
-        </div>
-    </div>
-
-    <!-- Time Range Selector -->
-    <nav id="time-controls">
-        <button class="time-btn" data-hours="1">1h</button>
-        <button class="time-btn active" data-hours="6">6h</button>
-        <button class="time-btn" data-hours="24">24h</button>
-        <button class="time-btn" data-hours="168">7d</button>
-        <button class="time-btn" data-hours="720">30d</button>
-        <span id="last-update">--</span>
+    <!-- Tab Bar -->
+    <nav id="tab-bar">
+        <button class="tab-btn active" data-tab="meshcore">MeshCore</button>
+        <button class="tab-btn" data-tab="raspberry-pi">Raspberry Pi</button>
+        <button class="tab-btn" data-tab="tools">Tools</button>
     </nav>
 
-    <!-- Charts Grid -->
-    <div class="charts-grid">
-        <div class="chart-card">
-            <h3>Solar / Repeater Voltage</h3>
-            <div id="chart-voltage" class="chart-container"></div>
-        </div>
-        <div class="chart-card">
-            <h3>Solar / Repeater Current</h3>
-            <div id="chart-current" class="chart-container"></div>
-        </div>
-        <div class="chart-card">
-            <h3>Solar / Repeater Power</h3>
-            <div id="chart-power" class="chart-container"></div>
-        </div>
-        <div class="chart-card">
-            <h3>Noise Floor</h3>
-            <div id="chart-radio" class="chart-container"></div>
-        </div>
-        <div class="chart-card">
-            <h3>Airtime Utilization</h3>
-            <div id="chart-airtime" class="chart-container"></div>
-        </div>
-        <div class="chart-card">
-            <h3>Packets (Direct / Flood)</h3>
-            <div id="chart-packets" class="chart-container"></div>
-        </div>
-    </div>
+    <!-- Tab: MeshCore -->
+    <div id="tab-meshcore" class="tab-panel active">
+        <!-- Time Range Selector -->
+        <nav id="time-controls">
+            <button class="time-btn" data-hours="1">1h</button>
+            <button class="time-btn active" data-hours="6">6h</button>
+            <button class="time-btn" data-hours="24">24h</button>
+            <button class="time-btn" data-hours="168">7d</button>
+            <button class="time-btn" data-hours="720">30d</button>
+            <span id="last-update">--</span>
+        </nav>
 
-    <!-- Neighbor Map + Details -->
-    <div class="neighbor-section">
-        <div class="full-width-card neighbor-map-card" id="map-card">
-            <div class="card-header">
-                <h3>Neighbor Map</h3>
-                <button id="map-fullscreen" class="icon-btn" title="Fullscreen map">&#x26F6;</button>
+        <!-- Charts Grid -->
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3>Solar / Repeater Voltage</h3>
+                <div id="chart-voltage" class="chart-container"></div>
             </div>
-            <div id="neighbor-map"></div>
+            <div class="chart-card">
+                <h3>Solar / Repeater Current</h3>
+                <div id="chart-current" class="chart-container"></div>
+            </div>
+            <div class="chart-card">
+                <h3>Solar / Repeater Power</h3>
+                <div id="chart-power" class="chart-container"></div>
+            </div>
+            <div class="chart-card">
+                <h3>Noise Floor</h3>
+                <div id="chart-radio" class="chart-container"></div>
+            </div>
+            <div class="chart-card">
+                <h3>Airtime Utilization</h3>
+                <div id="chart-airtime" class="chart-container"></div>
+            </div>
+            <div class="chart-card">
+                <h3>Packets (Direct / Flood)</h3>
+                <div id="chart-packets" class="chart-container"></div>
+            </div>
         </div>
-        <div class="full-width-card neighbor-list-card">
-            <h3>Neighbors</h3>
+
+        <!-- Neighbor Map + Details -->
+        <div class="neighbor-section">
+            <div class="full-width-card neighbor-map-card" id="map-card">
+                <div class="card-header">
+                    <h3>Neighbor Map</h3>
+                    <button id="map-fullscreen" class="icon-btn" title="Fullscreen map">&#x26F6;</button>
+                </div>
+                <div id="neighbor-map"></div>
+            </div>
+            <div class="full-width-card neighbor-list-card">
+                <h3>Neighbors</h3>
+                <div class="table-scroll">
+                    <table id="neighbors-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Role</th>
+                                <th>Last SNR</th>
+                                <th>Last RSSI</th>
+                                <th>Avg SNR</th>
+                                <th>Avg RSSI</th>
+                                <th>Last Seen</th>
+                            </tr>
+                        </thead>
+                        <tbody id="neighbors-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Packets Table -->
+        <div class="full-width-card">
+            <h3>Recent Packets</h3>
             <div class="table-scroll">
-                <table id="neighbors-table">
+                <table id="packets-table">
                     <thead>
                         <tr>
-                            <th>Name</th>
-                            <th>Role</th>
-                            <th>Last SNR</th>
-                            <th>Last RSSI</th>
-                            <th>Avg SNR</th>
-                            <th>Avg RSSI</th>
-                            <th>Last Seen</th>
+                            <th>Time</th>
+                            <th>Dir</th>
+                            <th>Type</th>
+                            <th>Route</th>
+                            <th>SNR</th>
+                            <th>RSSI</th>
+                            <th>Score</th>
+                            <th>Packet</th>
                         </tr>
                     </thead>
-                    <tbody id="neighbors-tbody"></tbody>
+                    <tbody id="packets-tbody"></tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    <!-- Recent Packets Table -->
-    <div class="full-width-card">
-        <h3>Recent Packets</h3>
-        <div class="table-scroll">
-            <table id="packets-table">
-                <thead>
-                    <tr>
-                        <th>Time</th>
-                        <th>Dir</th>
-                        <th>Type</th>
-                        <th>Route</th>
-                        <th>SNR</th>
-                        <th>RSSI</th>
-                        <th>Score</th>
-                        <th>Packet</th>
-                    </tr>
-                </thead>
-                <tbody id="packets-tbody"></tbody>
-            </table>
+    <!-- Tab: Raspberry Pi -->
+    <div id="tab-raspberry-pi" class="tab-panel">
+        <div class="placeholder-panel">
+            <div class="placeholder-icon">&#x1F353;</div>
+            <h2>Raspberry Pi Health</h2>
+            <p>CPU, memory, temperature, and storage monitoring coming soon.</p>
+        </div>
+    </div>
+
+    <!-- Tab: Tools -->
+    <div id="tab-tools" class="tab-panel">
+        <div class="tools-grid">
+            <!-- Flash Firmware Card -->
+            <div class="tool-card">
+                <div class="tool-card-header">
+                    <span class="tool-icon">&#x1F4E6;</span>
+                    <h3>Flash Firmware</h3>
+                </div>
+                <p class="tool-desc">Upload a firmware .zip to flash the repeater. Services will restart automatically.</p>
+                <div class="firmware-inputs">
+                    <label class="firmware-file-label">
+                        <span id="fw-file-name">Choose firmware .zip</span>
+                        <input type="file" id="fw-file" accept=".zip" />
+                    </label>
+                    <input type="text" id="fw-sha256" placeholder="Expected SHA256 hash" spellcheck="false" />
+                    <button id="fw-flash-btn" class="flash-btn" disabled>Flash</button>
+                </div>
+                <div id="fw-status" class="fw-status" style="display:none;">
+                    <span id="fw-status-text"></span>
+                </div>
+                <pre id="fw-log" class="fw-log" style="display:none;"></pre>
+            </div>
+
+            <!-- Reboot Radio Card -->
+            <div class="tool-card">
+                <div class="tool-card-header">
+                    <span class="tool-icon">&#x1F504;</span>
+                    <h3>Reboot Radio</h3>
+                </div>
+                <p class="tool-desc">Hard reboot the radio via relay GPIO. Useful for recovering from lockups.</p>
+                <button id="reboot-radio-btn" class="reboot-btn" disabled>Reboot Radio</button>
+                <p class="tool-note">Coming soon &mdash; requires relay hardware.</p>
+            </div>
         </div>
     </div>
 

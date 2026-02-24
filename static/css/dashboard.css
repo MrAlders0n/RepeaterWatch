@@ -1,12 +1,14 @@
 :root {
-    --bg: #1a1a2e;
-    --bg-card: #16213e;
-    --bg-header: #0f3460;
+    --bg: #0f0f1a;
+    --bg-card: #161625;
+    --bg-header: #0a0a18;
+    --bg-tab-bar: #111120;
     --text: #e0e0e0;
-    --text-muted: #888;
-    --border: #2a2a4a;
+    --text-muted: #777;
+    --border: #1e1e35;
     --accent: #00b4d8;
     --accent-dim: #0077b6;
+    --accent-glow: rgba(0, 180, 216, 0.15);
     --green: #06d6a0;
     --red: #ef476f;
     --yellow: #ffd166;
@@ -16,11 +18,13 @@
     --bg: #f0f0f5;
     --bg-card: #ffffff;
     --bg-header: #2b4a7a;
+    --bg-tab-bar: #e8e8f0;
     --text: #1a1a2e;
     --text-muted: #666;
     --border: #d0d0e0;
     --accent: #0077b6;
     --accent-dim: #00b4d8;
+    --accent-glow: rgba(0, 119, 182, 0.1);
 }
 
 * {
@@ -40,12 +44,9 @@ body {
 header {
     background: var(--bg-header);
     color: #fff;
-    padding: 10px 20px;
+    padding: 12px 20px;
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 10px;
 }
 
 .header-info {
@@ -56,7 +57,7 @@ header {
 }
 
 .header-info h1 {
-    font-size: 1.2rem;
+    font-size: 1.15rem;
     font-weight: 600;
     letter-spacing: -0.01em;
 }
@@ -64,17 +65,11 @@ header {
 .header-sep {
     width: 1px;
     height: 18px;
-    background: rgba(255,255,255,0.2);
-}
-
-.header-actions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    background: rgba(255,255,255,0.15);
 }
 
 .badge {
-    background: rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.1);
     padding: 3px 10px;
     border-radius: 12px;
     font-size: 0.75rem;
@@ -97,6 +92,48 @@ header {
 
 .status-dot.connected {
     background: var(--green);
+}
+
+/* Tab Bar */
+#tab-bar {
+    background: var(--bg-tab-bar);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 0;
+    padding: 0 20px;
+}
+
+.tab-btn {
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text-muted);
+    padding: 10px 20px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+    position: relative;
+}
+
+.tab-btn:hover {
+    color: var(--text);
+}
+
+.tab-btn.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+}
+
+/* Tab Panels */
+.tab-panel {
+    display: none;
+}
+
+.tab-panel.active {
+    display: block;
 }
 
 /* Time Controls */
@@ -264,7 +301,7 @@ header {
     text-shadow: 0 0 4px rgba(0,0,0,0.9);
 }
 
-/* Packets Table */
+/* Tables */
 .table-scroll {
     max-height: 350px;
     overflow-y: auto;
@@ -312,87 +349,90 @@ td.dir-rx { color: var(--green); }
 }
 .pkt-hex:hover { opacity: 1; }
 
-/* Footer */
-footer {
-    background: var(--bg-card);
-    border-top: 1px solid var(--border);
-    padding: 10px 20px;
+/* Placeholder Panel (Raspberry Pi) */
+.placeholder-panel {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 20px;
-    flex-wrap: wrap;
-    font-size: 0.85rem;
+    justify-content: center;
+    min-height: 400px;
+    padding: 60px 20px;
+    text-align: center;
     color: var(--text-muted);
 }
 
-footer strong {
+.placeholder-icon {
+    font-size: 3.5rem;
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+.placeholder-panel h2 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 8px;
+}
+
+.placeholder-panel p {
+    font-size: 0.9rem;
+    max-width: 360px;
+    line-height: 1.5;
+}
+
+/* Tools Tab */
+.tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.tool-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    transition: border-color 0.25s, box-shadow 0.25s;
+}
+
+.tool-card:hover {
+    border-color: var(--accent-dim);
+    box-shadow: 0 0 20px var(--accent-glow);
+}
+
+.tool-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.tool-icon {
+    font-size: 1.4rem;
+}
+
+.tool-card-header h3 {
+    font-size: 1rem;
+    font-weight: 600;
     color: var(--text);
 }
 
-#theme-toggle {
-    margin-left: auto;
-    background: transparent;
-    border: 1px solid var(--border);
+.tool-desc {
+    font-size: 0.85rem;
     color: var(--text-muted);
-    padding: 4px 12px;
-    border-radius: 4px;
-    cursor: pointer;
+    margin-bottom: 14px;
+    line-height: 1.45;
+}
+
+.tool-note {
     font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 10px;
+    font-style: italic;
 }
 
-#theme-toggle:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-}
-
-/* Header Action Buttons */
-.header-btn {
-    padding: 4px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.8rem;
-    font-weight: 600;
-    white-space: nowrap;
-    transition: background 0.15s, opacity 0.15s;
-    border: none;
-    color: #fff;
-}
-
-.header-btn.flash-btn {
-    background: #e65100;
-}
-
-.header-btn.flash-btn:hover {
-    background: #bf360c;
-}
-
-.header-btn.flash-btn.active {
-    background: #bf360c;
-    box-shadow: 0 0 0 2px rgba(230,81,0,0.4);
-}
-
-.header-btn.reboot-btn {
-    background: rgba(255,255,255,0.15);
-}
-
-.header-btn:disabled {
-    opacity: 0.35;
-    cursor: not-allowed;
-}
-
-/* Firmware Flash Panel */
-.firmware-panel {
-    background: var(--bg-card);
-    border-bottom: 2px solid #e65100;
-    padding: 12px 20px;
-}
-
-.firmware-panel-inner {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
+/* Firmware Inputs (inside tool card) */
 .firmware-inputs {
     display: flex;
     gap: 8px;
@@ -441,7 +481,7 @@ footer strong {
     color: var(--text-muted);
 }
 
-.firmware-panel .flash-btn {
+.tool-card .flash-btn {
     background: #e65100;
     color: #fff;
     border: none;
@@ -454,18 +494,41 @@ footer strong {
     transition: background 0.15s;
 }
 
-.firmware-panel .flash-btn:hover:not(:disabled) {
+.tool-card .flash-btn:hover:not(:disabled) {
     background: #bf360c;
 }
 
-.firmware-panel .flash-btn:disabled {
+.tool-card .flash-btn:disabled {
     opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.reboot-btn {
+    background: rgba(255,255,255,0.08);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 8px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: border-color 0.15s, background 0.15s;
+}
+
+.reboot-btn:hover:not(:disabled) {
+    border-color: var(--accent);
+    background: rgba(255,255,255,0.12);
+}
+
+.reboot-btn:disabled {
+    opacity: 0.35;
     cursor: not-allowed;
 }
 
 .fw-status {
     font-size: 0.85rem;
     font-weight: 600;
+    margin-top: 10px;
 }
 
 .fw-status.state-flashing { color: var(--yellow); }
@@ -473,7 +536,7 @@ footer strong {
 .fw-status.state-error { color: var(--red); }
 
 .fw-log {
-    background: #0d0d0d;
+    background: #0a0a0a;
     color: #ccc;
     font-family: monospace;
     font-size: 0.78rem;
@@ -484,13 +547,47 @@ footer strong {
     white-space: pre-wrap;
     word-break: break-all;
     line-height: 1.5;
-    border: 1px solid #333;
+    border: 1px solid #222;
+    margin-top: 10px;
 }
 
 [data-theme="light"] .fw-log {
     background: #f5f5f5;
     color: #222;
     border-color: #ccc;
+}
+
+/* Footer */
+footer {
+    background: var(--bg-card);
+    border-top: 1px solid var(--border);
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+footer strong {
+    color: var(--text);
+}
+
+#theme-toggle {
+    margin-left: auto;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    padding: 4px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+
+#theme-toggle:hover {
+    border-color: var(--accent);
+    color: var(--accent);
 }
 
 /* Responsive */
@@ -515,5 +612,19 @@ footer strong {
     footer {
         padding: 8px 12px;
         gap: 12px;
+    }
+
+    #tab-bar {
+        padding: 0 12px;
+    }
+
+    .tab-btn {
+        padding: 10px 14px;
+        font-size: 0.78rem;
+    }
+
+    .tools-grid {
+        grid-template-columns: 1fr;
+        padding: 12px;
     }
 }
