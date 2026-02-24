@@ -2,7 +2,7 @@ import logging
 import os
 import pty
 import select
-import signal
+import subprocess
 import threading
 import time
 
@@ -17,17 +17,19 @@ def register_terminal_routes(sock):
 
     @sock.route("/ws/terminal/pty")
     def terminal_pty(ws):
-        child_pid, master_fd = pty.fork()
-
-        if child_pid == 0:
-            # Child — exec login; this replaces the process entirely
-            os.environ.clear()
-            os.environ["TERM"] = "xterm-256color"
-            os.environ["PATH"] = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-            os.execv("/bin/login", ["/bin/login"])
-
-        # Parent
+        master_fd, slave_fd = pty.openpty()
+        shell = os.environ.get("SHELL", "/bin/bash")
         stop = threading.Event()
+
+        proc = subprocess.Popen(
+            [shell, "--login"],
+            stdin=slave_fd,
+            stdout=slave_fd,
+            stderr=slave_fd,
+            preexec_fn=os.setsid,
+            env={"TERM": "xterm-256color", "PATH": "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin", "HOME": os.path.expanduser("~")},
+        )
+        os.close(slave_fd)
 
         def reader():
             try:
@@ -57,10 +59,10 @@ def register_terminal_routes(sock):
         finally:
             stop.set()
             try:
-                os.kill(child_pid, signal.SIGHUP)
-                os.waitpid(child_pid, 0)
+                proc.terminate()
+                proc.wait(timeout=2)
             except Exception:
-                pass
+                proc.kill()
             try:
                 os.close(master_fd)
             except OSError:
