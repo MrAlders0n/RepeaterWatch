@@ -293,6 +293,7 @@ def stats_pi_snapshot():
             "system": platform.system(),
             "release": platform.release(),
             "machine": platform.machine(),
+            "hostname": platform.node(),
             "python": platform.python_version(),
         },
     })

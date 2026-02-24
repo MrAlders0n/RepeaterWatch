@@ -62,25 +62,6 @@ header {
     letter-spacing: -0.01em;
 }
 
-.header-sep {
-    width: 1px;
-    height: 18px;
-    background: rgba(255,255,255,0.15);
-}
-
-.badge {
-    background: rgba(255,255,255,0.1);
-    padding: 3px 10px;
-    border-radius: 12px;
-    font-size: 0.75rem;
-    font-weight: 500;
-    letter-spacing: 0.02em;
-}
-
-.badge-uptime {
-    font-variant-numeric: tabular-nums;
-}
-
 .status-dot {
     width: 10px;
     height: 10px;
@@ -349,6 +330,31 @@ td.dir-rx { color: var(--green); }
 }
 .pkt-hex:hover { opacity: 1; }
 
+/* Info Bar */
+.info-bar {
+    background: var(--bg-tab-bar);
+    border-bottom: 1px solid var(--border);
+    padding: 6px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+}
+
+.info-bar strong {
+    color: var(--text);
+    font-weight: 600;
+}
+
+.info-bar-sep {
+    width: 1px;
+    height: 14px;
+    background: var(--border);
+    flex-shrink: 0;
+}
+
 /* Pi Time Controls */
 .pi-time-controls {
     background: var(--bg-card);
@@ -366,15 +372,15 @@ td.dir-rx { color: var(--green); }
     color: var(--text-muted);
 }
 
-/* Pi Status Cards */
-.pi-status-grid {
+/* Status Cards (shared by MeshCore + Pi tabs) */
+.status-grid {
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
     padding: 16px 20px 0;
 }
 
-.pi-status-card {
+.status-card {
     flex: 1 1 140px;
     background: var(--bg-card);
     border: 1px solid var(--border);
@@ -386,7 +392,7 @@ td.dir-rx { color: var(--green); }
     min-width: 140px;
 }
 
-.pi-status-label {
+.status-label {
     font-size: 0.75rem;
     font-weight: 600;
     text-transform: uppercase;
@@ -394,29 +400,29 @@ td.dir-rx { color: var(--green); }
     color: var(--text-muted);
 }
 
-.pi-status-value {
+.status-value {
     font-size: 1.5rem;
     font-weight: 700;
     color: var(--text);
     font-variant-numeric: tabular-nums;
 }
 
-.pi-status-sub {
+.status-sub {
     font-size: 0.78rem;
     color: var(--text-muted);
     font-variant-numeric: tabular-nums;
 }
 
 /* Temperature threshold colors */
-.pi-status-value.temp-cool {
+.status-value.temp-cool {
     color: var(--green);
 }
 
-.pi-status-value.temp-warm {
+.status-value.temp-warm {
     color: var(--yellow);
 }
 
-.pi-status-value.temp-hot {
+.status-value.temp-hot {
     color: var(--red);
 }
 
@@ -777,11 +783,15 @@ footer strong {
         padding: 12px;
     }
 
-    .pi-status-grid {
+    .status-grid {
         padding: 12px 12px 0;
     }
 
     .pi-time-controls {
         padding: 8px 12px;
+    }
+
+    .info-bar {
+        padding: 6px 12px;
     }
 }

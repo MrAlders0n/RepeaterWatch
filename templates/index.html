@@ -13,11 +13,7 @@
     <header id="header">
         <div class="header-info">
             <span class="status-dot" id="status-dot" title="Collector status"></span>
-            <h1 id="device-name">MeshCore Repeater</h1>
-            <span class="header-sep"></span>
-            <span class="badge" id="firmware-badge">--</span>
-            <span class="badge" id="board-badge">--</span>
-            <span class="badge badge-uptime" id="uptime-display">--</span>
+            <h1>MeshCore Repeater Monitor</h1>
         </div>
         {% if auth_enabled %}
         <a href="/logout" class="logout-btn">Logout</a>
@@ -33,6 +29,16 @@
 
     <!-- Tab: MeshCore -->
     <div id="tab-meshcore" class="tab-panel active">
+        <!-- Device Info Bar -->
+        <div class="info-bar">
+            <span class="info-bar-item"><strong id="mc-radio-name">--</strong></span>
+            <span class="info-bar-sep"></span>
+            <span class="info-bar-item" id="mc-firmware">--</span>
+            <span class="info-bar-sep"></span>
+            <span class="info-bar-item" id="mc-board">--</span>
+            <span class="info-bar-item" id="mc-radio-config">--</span>
+        </div>
+
         <!-- Time Range Selector -->
         <nav id="time-controls">
             <button class="time-btn" data-hours="1">1h</button>
@@ -42,6 +48,35 @@
             <button class="time-btn" data-hours="720">30d</button>
             <span id="last-update">--</span>
         </nav>
+
+        <!-- Status Cards -->
+        <div class="status-grid">
+            <div class="status-card">
+                <span class="status-label">Uptime</span>
+                <span class="status-value" id="mc-uptime-val">--</span>
+                <span class="status-sub" id="mc-uptime-sub">Radio uptime</span>
+            </div>
+            <div class="status-card">
+                <span class="status-label">TX Packets</span>
+                <span class="status-value" id="mc-tx-val">--</span>
+                <span class="status-sub" id="mc-tx-sub">Direct / Flood</span>
+            </div>
+            <div class="status-card">
+                <span class="status-label">RX Packets</span>
+                <span class="status-value" id="mc-rx-val">--</span>
+                <span class="status-sub" id="mc-rx-sub">Direct / Flood</span>
+            </div>
+            <div class="status-card">
+                <span class="status-label">Forwarded</span>
+                <span class="status-value" id="mc-fwd-val">--</span>
+                <span class="status-sub" id="mc-fwd-sub">--</span>
+            </div>
+            <div class="status-card">
+                <span class="status-label">Errors</span>
+                <span class="status-value" id="mc-err-val">--</span>
+                <span class="status-sub" id="mc-err-sub">--</span>
+            </div>
+        </div>
 
         <!-- Charts Grid -->
         <div class="charts-grid">
@@ -126,6 +161,15 @@
 
     <!-- Tab: Raspberry Pi -->
     <div id="tab-raspberry-pi" class="tab-panel">
+        <!-- Pi Info Bar -->
+        <div class="info-bar">
+            <span class="info-bar-item"><strong id="pi-hostname">--</strong></span>
+            <span class="info-bar-sep"></span>
+            <span class="info-bar-item" id="pi-os-version">--</span>
+            <span class="info-bar-sep"></span>
+            <span class="info-bar-item" id="pi-model">--</span>
+        </div>
+
         <!-- Pi Time Range Selector -->
         <nav class="pi-time-controls">
             <button class="time-btn pi-time-btn" data-hours="1">1h</button>
@@ -137,36 +181,36 @@
         </nav>
 
         <!-- Status Cards -->
-        <div class="pi-status-grid">
-            <div class="pi-status-card">
-                <span class="pi-status-label">CPU</span>
-                <span class="pi-status-value" id="pi-cpu-val">--%</span>
-                <span class="pi-status-sub" id="pi-cpu-sub">-- cores</span>
+        <div class="status-grid">
+            <div class="status-card">
+                <span class="status-label">CPU</span>
+                <span class="status-value" id="pi-cpu-val">--%</span>
+                <span class="status-sub" id="pi-cpu-sub">-- cores</span>
             </div>
-            <div class="pi-status-card">
-                <span class="pi-status-label">Memory</span>
-                <span class="pi-status-value" id="pi-mem-val">--%</span>
-                <span class="pi-status-sub" id="pi-mem-sub">-- / -- MB</span>
+            <div class="status-card">
+                <span class="status-label">Memory</span>
+                <span class="status-value" id="pi-mem-val">--%</span>
+                <span class="status-sub" id="pi-mem-sub">-- / -- MB</span>
             </div>
-            <div class="pi-status-card">
-                <span class="pi-status-label">Temperature</span>
-                <span class="pi-status-value" id="pi-temp-val">--</span>
-                <span class="pi-status-sub" id="pi-temp-sub">CPU thermal</span>
+            <div class="status-card">
+                <span class="status-label">Temperature</span>
+                <span class="status-value" id="pi-temp-val">--</span>
+                <span class="status-sub" id="pi-temp-sub">CPU thermal</span>
             </div>
-            <div class="pi-status-card">
-                <span class="pi-status-label">Disk</span>
-                <span class="pi-status-value" id="pi-disk-val">--%</span>
-                <span class="pi-status-sub" id="pi-disk-sub">-- / -- GB</span>
+            <div class="status-card">
+                <span class="status-label">Disk</span>
+                <span class="status-value" id="pi-disk-val">--%</span>
+                <span class="status-sub" id="pi-disk-sub">-- / -- GB</span>
             </div>
-            <div class="pi-status-card">
-                <span class="pi-status-label">Load Average</span>
-                <span class="pi-status-value" id="pi-load-val">--</span>
-                <span class="pi-status-sub" id="pi-load-sub">1m / 5m / 15m</span>
+            <div class="status-card">
+                <span class="status-label">Load Average</span>
+                <span class="status-value" id="pi-load-val">--</span>
+                <span class="status-sub" id="pi-load-sub">1m / 5m / 15m</span>
             </div>
-            <div class="pi-status-card">
-                <span class="pi-status-label">Uptime</span>
-                <span class="pi-status-value" id="pi-uptime-val">--</span>
-                <span class="pi-status-sub" id="pi-uptime-sub">-- processes</span>
+            <div class="status-card">
+                <span class="status-label">Uptime</span>
+                <span class="status-value" id="pi-uptime-val">--</span>
+                <span class="status-sub" id="pi-uptime-sub">-- processes</span>
             </div>
         </div>
 

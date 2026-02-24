@@ -88,6 +88,7 @@
 
         fetchJSON('/api/v1/stats/pi/snapshot').then(function (d) {
             updatePiStatusCards(d);
+            updatePiInfoBar(d);
             renderPiProcesses(d.top_processes || []);
         }).catch(noop);
 
@@ -104,13 +105,13 @@
         var tempEl = document.getElementById('pi-temp-val');
         if (d.cpu_temp != null) {
             tempEl.textContent = d.cpu_temp.toFixed(1) + '\u00b0C';
-            tempEl.className = 'pi-status-value';
+            tempEl.className = 'status-value';
             if (d.cpu_temp >= 80) tempEl.classList.add('temp-hot');
             else if (d.cpu_temp >= 60) tempEl.classList.add('temp-warm');
             else tempEl.classList.add('temp-cool');
         } else {
             tempEl.textContent = 'N/A';
-            tempEl.className = 'pi-status-value';
+            tempEl.className = 'status-value';
         }
 
         document.getElementById('pi-disk-val').textContent = (d.disk_percent != null ? d.disk_percent.toFixed(1) + '%' : '--%');
@@ -121,6 +122,13 @@
 
         document.getElementById('pi-uptime-val').textContent = formatUptime(d.uptime_secs);
         document.getElementById('pi-uptime-sub').textContent = (d.process_count != null ? d.process_count + ' processes' : '-- processes');
+    }
+
+    function updatePiInfoBar(d) {
+        var p = d.platform || {};
+        document.getElementById('pi-hostname').textContent = p.hostname || p.node || '--';
+        document.getElementById('pi-os-version').textContent = (p.system || '--') + ' ' + (p.release || '');
+        document.getElementById('pi-model').textContent = p.machine || '--';
     }
 
     function renderPiProcesses(procs) {
@@ -208,14 +216,6 @@
     }
 
     function refreshHeader() {
-        fetchJSON('/api/v1/device').then(function (d) {
-            document.getElementById('device-name').textContent = d.name || 'MeshCore Repeater';
-            document.getElementById('firmware-badge').textContent = d.firmware || '--';
-            document.getElementById('board-badge').textContent = d.board || '--';
-            document.getElementById('uptime-display').textContent = formatUptime(d.uptime_secs);
-            NeighborMap.setRepeaterInfo(d);
-        }).catch(noop);
-
         fetchJSON('/api/v1/status').then(function (d) {
             var dot = document.getElementById('status-dot');
             dot.classList.toggle('connected', d.serial_connected);
@@ -229,6 +229,19 @@
 
     function refreshMeshCore() {
         var h = currentHours;
+
+        fetchJSON('/api/v1/device').then(function (d) {
+            document.getElementById('mc-radio-name').textContent = d.name || '--';
+            document.getElementById('mc-firmware').textContent = d.firmware || '--';
+            document.getElementById('mc-board').textContent = d.board || '--';
+            document.getElementById('mc-radio-config').textContent = d.radio_config || '';
+            document.getElementById('mc-uptime-val').textContent = formatUptime(d.uptime_secs);
+            NeighborMap.setRepeaterInfo(d);
+        }).catch(noop);
+
+        fetchJSON('/api/v1/stats/packets?hours=' + h).then(function (d) {
+            updateMeshCoreStatusCards(d);
+        }).catch(noop);
 
         fetchJSON('/api/v1/stats/power?hours=' + h).then(function (d) {
             PowerCharts.update(d);
@@ -260,6 +273,24 @@
         }).catch(noop);
 
         document.getElementById('last-update').textContent = 'Updated: ' + new Date().toLocaleTimeString();
+    }
+
+    function updateMeshCoreStatusCards(d) {
+        if (!d.timestamps || !d.timestamps.length) return;
+        var last = d.timestamps.length - 1;
+        var sent = d.sent_total[last] || 0;
+        var recv = d.recv_total[last] || 0;
+        var fwd = d.fwd_total[last] || 0;
+        var fwdErr = d.fwd_errors[last] || 0;
+        var rxErr = d.recv_errors[last] || 0;
+        var dups = d.direct_dups[last] || 0;
+
+        document.getElementById('mc-tx-val').textContent = sent.toLocaleString();
+        document.getElementById('mc-rx-val').textContent = recv.toLocaleString();
+        document.getElementById('mc-fwd-val').textContent = fwd.toLocaleString();
+        document.getElementById('mc-fwd-sub').textContent = fwdErr + ' errors';
+        document.getElementById('mc-err-val').textContent = rxErr.toLocaleString();
+        document.getElementById('mc-err-sub').textContent = dups + ' duplicates';
     }
 
     function refreshAll() {
@@ -398,7 +429,7 @@
     // ── Event Handlers ───────────────────────────────────
 
     function setupTimeButtons() {
-        var buttons = document.querySelectorAll('.time-btn');
+        var buttons = document.querySelectorAll('#time-controls .time-btn');
         buttons.forEach(function (btn) {
             btn.addEventListener('click', function () {
                 buttons.forEach(function (b) { b.classList.remove('active'); });
