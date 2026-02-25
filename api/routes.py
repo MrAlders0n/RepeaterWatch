@@ -422,6 +422,32 @@ def list_services():
     return jsonify([_get_service_info(s) for s in MANAGED_SERVICES])
 
 
+@api.route("/services/<name>/start", methods=["POST"])
+def start_service(name):
+    if name not in MANAGED_SERVICES:
+        return jsonify({"error": "Unknown service"}), 400
+
+    def do_start():
+        subprocess.run(["systemctl", "start", name], timeout=30)
+
+    threading.Timer(1.0, do_start).start()
+    return jsonify({"status": "ok"})
+
+
+@api.route("/services/<name>/stop", methods=["POST"])
+def stop_service(name):
+    if name not in MANAGED_SERVICES:
+        return jsonify({"error": "Unknown service"}), 400
+    if name == "RepeaterWatch":
+        return jsonify({"error": "Cannot stop RepeaterWatch"}), 400
+
+    def do_stop():
+        subprocess.run(["systemctl", "stop", name], timeout=30)
+
+    threading.Timer(1.0, do_stop).start()
+    return jsonify({"status": "ok"})
+
+
 @api.route("/services/<name>/restart", methods=["POST"])
 def restart_service(name):
     if name not in MANAGED_SERVICES:

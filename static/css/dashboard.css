@@ -429,7 +429,7 @@ td.dir-rx { color: var(--green); }
 /* Tools Tab */
 .tools-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
     gap: 20px;
     padding: 20px;
 }
@@ -605,7 +605,12 @@ td.dir-rx { color: var(--green); }
     margin-right: 8px;
 }
 
-.restart-btn {
+.service-btns {
+    display: flex;
+    gap: 6px;
+}
+
+.svc-btn {
     background: rgba(255,255,255,0.08);
     color: var(--text);
     border: 1px solid var(--border);
@@ -618,14 +623,34 @@ td.dir-rx { color: var(--green); }
     transition: border-color 0.15s, background 0.15s;
 }
 
-.restart-btn:hover:not(:disabled) {
+.svc-btn:hover:not(:disabled) {
     border-color: var(--accent);
     background: rgba(255,255,255,0.12);
 }
 
-.restart-btn:disabled {
+.svc-btn:disabled {
     opacity: 0.4;
     cursor: not-allowed;
+}
+
+.svc-btn.start-btn {
+    border-color: var(--green);
+    color: var(--green);
+}
+
+.svc-btn.start-btn:hover:not(:disabled) {
+    background: rgba(6, 214, 160, 0.12);
+    border-color: var(--green);
+}
+
+.svc-btn.stop-btn {
+    border-color: var(--red);
+    color: var(--red);
+}
+
+.svc-btn.stop-btn:hover:not(:disabled) {
+    background: rgba(239, 71, 111, 0.12);
+    border-color: var(--red);
 }
 
 .reboot-btn {

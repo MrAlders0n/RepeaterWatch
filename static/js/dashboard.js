@@ -558,18 +558,21 @@
     var servicesTimer = null;
 
     function setupServices() {
-        document.querySelectorAll('.restart-btn').forEach(function (btn) {
+        document.querySelectorAll('.svc-btn').forEach(function (btn) {
             btn.addEventListener('click', function () {
                 var name = btn.getAttribute('data-service');
-                if (!confirm('Restart service "' + name + '"?')) return;
+                var action = btn.getAttribute('data-action');
+                var label = action.charAt(0).toUpperCase() + action.slice(1);
+                if (!confirm(label + ' service "' + name + '"?')) return;
                 btn.disabled = true;
-                btn.textContent = 'Restarting...';
-                fetch('/api/v1/services/' + encodeURIComponent(name) + '/restart', { method: 'POST' })
+                var origText = btn.textContent;
+                btn.textContent = label + 'ing...';
+                fetch('/api/v1/services/' + encodeURIComponent(name) + '/' + action, { method: 'POST' })
                     .then(function (r) { return r.json(); })
                     .then(function () {
-                        btn.textContent = 'Restarted';
+                        btn.textContent = label + 'ed';
                         setTimeout(function () {
-                            btn.textContent = 'Restart';
+                            btn.textContent = origText;
                             btn.disabled = false;
                             refreshServices();
                         }, 3000);
@@ -577,7 +580,7 @@
                     .catch(function () {
                         btn.textContent = 'Error';
                         setTimeout(function () {
-                            btn.textContent = 'Restart';
+                            btn.textContent = origText;
                             btn.disabled = false;
                         }, 3000);
                     });
@@ -644,6 +647,13 @@
                 } else {
                     uptimeEl.textContent = svc.active ? '--' : 'stopped';
                 }
+                // Toggle Start/Stop/Restart visibility based on state
+                var startBtn = row.querySelector('.start-btn');
+                var stopBtn = row.querySelector('.stop-btn');
+                var restartBtn = row.querySelector('.restart-btn');
+                if (startBtn) startBtn.style.display = svc.active ? 'none' : '';
+                if (stopBtn) stopBtn.style.display = svc.active ? '' : 'none';
+                if (restartBtn) restartBtn.style.display = svc.active ? '' : 'none';
             });
         }).catch(function (e) { console.warn('Services fetch failed:', e); });
     }
