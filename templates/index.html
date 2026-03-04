@@ -7,6 +7,14 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="/static/css/dashboard.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@xterm/xterm@5/css/xterm.min.css" />
+    <script>
+        (function() {
+            var t = localStorage.getItem('repeaterwatch-theme') ||
+                    (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    <style>body { opacity: 0; } body.ready { opacity: 1; transition: opacity .15s; }</style>
 </head>
 <body>
     <!-- Header -->

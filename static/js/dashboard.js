@@ -1117,4 +1117,6 @@
     });
 
     refreshTimer = setInterval(refreshAll, REFRESH_INTERVAL);
+
+    document.body.classList.add('ready');
 })();
