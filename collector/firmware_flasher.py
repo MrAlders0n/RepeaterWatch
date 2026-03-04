@@ -43,6 +43,14 @@ def _reset_state():
         _state["progress"] = ""
 
 
+def _list_serial_by_id() -> set[str]:
+    """Return the set of symlink names in /dev/serial/by-id/."""
+    by_id = "/dev/serial/by-id"
+    if not os.path.isdir(by_id):
+        return set()
+    return set(os.listdir(by_id))
+
+
 def _set_usb_relay(enable: bool):
     """Toggle the USB relay via pinctrl."""
     pin = str(config.USB_RELAY_GPIO_PIN)
@@ -131,8 +139,23 @@ def _flash_worker(fw_path: str, expected_hash: str, poller) -> None:
     # Enable USB relay so the DFU port appears
     _set_state("flashing", "Enabling radio USB...")
     _append_log("Enabling radio USB relay...")
+    before_devices = _list_serial_by_id()
     _set_usb_relay(True)
     _append_log("Radio USB enabled.")
+
+    # Wait for USB enumeration and detect new device
+    _append_log("Waiting for USB device to enumerate...")
+    detected = None
+    for _ in range(6):
+        time.sleep(1)
+        new = _list_serial_by_id() - before_devices
+        if new:
+            detected = next(iter(new))
+            break
+    if detected:
+        _append_log(f"Detected USB device: {detected}")
+    else:
+        _append_log("Warning: no new USB device detected after enabling relay.")
 
     # Wait for the DFU serial port to re-appear after USB re-enumeration
     port = models.get_setting("flash_serial_port", config.FLASH_SERIAL_PORT)
