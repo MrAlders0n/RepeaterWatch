@@ -30,11 +30,16 @@ def read() -> dict | None:
             ch1_v = ina[1].bus_voltage
             ch1_i = ina[1].current
             ch1_sv = ina[1].shunt_voltage
+            ch2_v = ina[2].bus_voltage
+            ch2_i = ina[2].current
+            ch2_sv = ina[2].shunt_voltage
             if attempt == 0:
-                logger.info("INA3221 raw: ch0 bus=%.4fV shunt=%.4fmV i=%.2fmA enabled=%s | "
-                            "ch1 bus=%.4fV shunt=%.4fmV i=%.2fmA enabled=%s",
-                             ch0_v, ch0_sv, ch0_i, ina[0].enabled,
-                             ch1_v, ch1_sv, ch1_i, ina[1].enabled)
+                logger.info("INA3221 raw: ch0 bus=%.4fV shunt=%.4fmV i=%.2fmA | "
+                            "ch1 bus=%.4fV shunt=%.4fmV i=%.2fmA | "
+                            "ch2 bus=%.4fV shunt=%.4fmV i=%.2fmA",
+                             ch0_v, ch0_sv, ch0_i,
+                             ch1_v, ch1_sv, ch1_i,
+                             ch2_v, ch2_sv, ch2_i)
             return {
                 "ch0_voltage": round(ch0_v, 4),
                 "ch0_current": round(ch0_i, 2),
