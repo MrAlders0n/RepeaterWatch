@@ -69,12 +69,21 @@ class SensorPoller:
         self._as3935.cleanup()
 
     def _run(self):
+        logger.info("SensorPoller thread started")
+        try:
+            self._run_loop()
+        except Exception:
+            logger.exception("SensorPoller thread crashed")
+
+    def _run_loop(self):
         # Accumulation buffers for accelerometer readings within a 5-min window
         accel_buf: list[dict] = []
 
         while not self._stop_event.is_set():
             current_ts = models.aligned_ts()
             next_boundary = current_ts + 300
+            wait_secs = next_boundary - time.time()
+            logger.info("Waiting %.0fs for next 5-min boundary (ts=%d)", wait_secs, next_boundary)
 
             # Inner loop: poll accelerometer every 5s until next 5-min boundary
             while not self._stop_event.is_set():
@@ -120,6 +129,9 @@ class SensorPoller:
                         ch1_p=data["ch1_power"],
                     )
                     self._sensor_status["ina3221"]["ok"] = True
+                    logger.info("INA3221: ch0=%.3fV/%.1fmA ch1=%.3fV/%.1fmA",
+                                data["ch0_voltage"], data["ch0_current"],
+                                data["ch1_voltage"], data["ch1_current"])
                 else:
                     self._sensor_status["ina3221"]["ok"] = False
             except Exception as e:
@@ -137,6 +149,8 @@ class SensorPoller:
                         pressure=data["pressure"],
                     )
                     self._sensor_status["bme280"]["ok"] = True
+                    logger.info("BME280: %.1f°C / %.1f%% / %.1f hPa",
+                                data["temperature"], data["humidity"], data["pressure"])
                 else:
                     self._sensor_status["bme280"]["ok"] = False
             except Exception as e:
@@ -161,6 +175,8 @@ class SensorPoller:
                         y_avg=round(sum(ys) / n, 4),
                         z_avg=round(sum(zs) / n, 4),
                     )
+                    logger.info("LIS2DW12: %d samples, avg_mag=%.4f, peak=%.4f",
+                                n, sum(mags) / n, max(mags))
                 except Exception:
                     logger.exception("Accelerometer aggregation error")
                 accel_buf = []
