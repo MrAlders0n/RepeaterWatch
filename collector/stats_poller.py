@@ -211,10 +211,12 @@ class StatsPoller:
                 process_count=proc_count,
             )
 
-            # Per-device disk IO
+            # Per-device disk IO (skip virtual devices like loop*, ram*, dm-*)
             perdisk = psutil.disk_io_counters(perdisk=True)
             if perdisk:
                 for dev, counters in perdisk.items():
+                    if dev.startswith(("loop", "ram", "dm-", "zram")):
+                        continue
                     models.insert_disk_io(
                         ts, dev, counters.read_bytes, counters.write_bytes
                     )

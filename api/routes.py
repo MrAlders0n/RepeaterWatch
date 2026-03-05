@@ -238,7 +238,8 @@ def stats_pi_health():
 @api.route("/stats/pi/disk-io")
 def stats_pi_disk_io():
     devices = models.query_disk_io(_hours())
-    if devices:
+    # Only use per-device data if at least one device has computed deltas
+    if any(d["timestamps"] for d in devices.values()):
         return jsonify({"devices": devices})
     # Fallback to aggregate data from pi_health table
     rows = models.query_pi_disk_io(_hours())
