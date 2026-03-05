@@ -12,7 +12,16 @@ from collector.sensors.as3935_sensor import AS3935
 
 logger = logging.getLogger(__name__)
 
-ACCEL_POLL_SECS = 5
+# Polling intervals (seconds)
+POLL_TICK = 5          # Base loop tick
+POWER_INTERVAL = 10    # INA3221 every 10s
+ENV_INTERVAL = 60      # BME280 every 60s
+ACCEL_INTERVAL = 5     # LIS2DW12 every 5s
+
+
+def _aligned(t: float, interval: int) -> int:
+    """Align epoch time to interval boundary."""
+    return (int(t) // interval) * interval
 
 
 class SensorPoller:
@@ -58,6 +67,8 @@ class SensorPoller:
         logger.info("SensorPoller starting — available: [%s], missing: [%s]",
                      ", ".join(available) or "none",
                      ", ".join(missing) or "none")
+        logger.info("Intervals: power=%ds, env=%ds, accel=%ds",
+                     POWER_INTERVAL, ENV_INTERVAL, ACCEL_INTERVAL)
 
         self._thread = threading.Thread(target=self._run, daemon=True, name="sensor-poller")
         self._thread.start()
@@ -76,126 +87,106 @@ class SensorPoller:
             logger.exception("SensorPoller thread crashed")
 
     def _run_loop(self):
-        # Accumulation buffers for readings within a 5-min window
-        accel_buf: list[dict] = []
-        power_buf: list[dict] = []
+        last_power = 0
+        last_env = 0
+        last_accel = 0
+        cycle = 0
 
         while not self._stop_event.is_set():
-            current_ts = models.aligned_ts()
-            next_boundary = current_ts + 300
-            wait_secs = next_boundary - time.time()
-            logger.info("Waiting %.0fs for next 5-min boundary (ts=%d)", wait_secs, next_boundary)
+            now = time.time()
 
-            # Inner loop: poll sensors every 5s until next 5-min boundary
-            while not self._stop_event.is_set():
-                now = time.time()
-                if now >= next_boundary:
-                    break
+            # INA3221 — every 10s
+            if now - last_power >= POWER_INTERVAL:
+                self._poll_power(now)
+                last_power = now
 
-                # Poll INA3221
-                try:
-                    reading = ina3221_sensor.read()
-                    if reading is not None:
-                        power_buf.append(reading)
-                        self._sensor_status["ina3221"]["ok"] = True
-                except Exception as e:
-                    self._sensor_status["ina3221"]["last_error"] = str(e)
+            # LIS2DW12 — every 5s
+            if now - last_accel >= ACCEL_INTERVAL:
+                self._poll_accel(now)
+                last_accel = now
 
-                # Poll accelerometer
-                try:
-                    reading = lis2dw12_sensor.read()
-                    if reading is not None:
-                        accel_buf.append(reading)
-                        self._sensor_status["lis2dw12"]["ok"] = True
-                except Exception as e:
-                    self._sensor_status["lis2dw12"]["last_error"] = str(e)
+            # BME280 — every 60s
+            if now - last_env >= ENV_INTERVAL:
+                self._poll_env(now)
+                last_env = now
 
-                # Drain and store AS3935 events immediately
-                self._store_lightning_events()
+            # AS3935 — drain events every tick
+            self._store_lightning_events()
 
-                # Wait for next poll or boundary
-                wait = min(ACCEL_POLL_SECS, next_boundary - time.time())
-                if wait > 0:
-                    self._stop_event.wait(wait)
+            # Log summary every 5 minutes
+            cycle += 1
+            if cycle % (300 // POLL_TICK) == 0:
+                logger.info("SensorPoller alive — power=%s bme=%s accel=%s as3935=%s",
+                            self._sensor_status["ina3221"]["ok"],
+                            self._sensor_status["bme280"]["ok"],
+                            self._sensor_status["lis2dw12"]["ok"],
+                            self._sensor_status["as3935"]["ok"])
 
-            if self._stop_event.is_set():
-                break
+            # Sleep until next tick
+            elapsed = time.time() - now
+            sleep = max(0, POLL_TICK - elapsed)
+            if sleep > 0:
+                self._stop_event.wait(sleep)
 
-            # 5-minute boundary reached — aggregate and store
-            ts = models.aligned_ts()
-            logger.info("Sensor poll cycle at ts=%d (power samples=%d, accel samples=%d)",
-                        ts, len(power_buf), len(accel_buf))
-
-            # INA3221 — average over window
-            if power_buf:
-                try:
-                    n = len(power_buf)
-                    ch0_v = sum(r["ch0_voltage"] for r in power_buf) / n
-                    ch0_i = sum(r["ch0_current"] for r in power_buf) / n
-                    ch1_v = sum(r["ch1_voltage"] for r in power_buf) / n
-                    ch1_i = sum(r["ch1_current"] for r in power_buf) / n
-                    models.insert_sensor_power(
-                        ts,
-                        ch0_v=round(ch0_v, 4),
-                        ch0_i=round(ch0_i, 2),
-                        ch0_p=round(ch0_v * ch0_i, 2),
-                        ch1_v=round(ch1_v, 4),
-                        ch1_i=round(ch1_i, 2),
-                        ch1_p=round(ch1_v * ch1_i, 2),
-                    )
-                    logger.info("INA3221: %d samples, ch0=%.3fV/%.1fmA ch1=%.3fV/%.1fmA",
-                                n, ch0_v, ch0_i, ch1_v, ch1_i)
-                except Exception:
-                    logger.exception("INA3221 aggregation error")
-                power_buf = []
+    def _poll_power(self, now: float):
+        try:
+            data = ina3221_sensor.read()
+            if data is not None:
+                ts = _aligned(now, POWER_INTERVAL)
+                models.insert_sensor_power(
+                    ts,
+                    ch0_v=data["ch0_voltage"],
+                    ch0_i=data["ch0_current"],
+                    ch0_p=data["ch0_power"],
+                    ch1_v=data["ch1_voltage"],
+                    ch1_i=data["ch1_current"],
+                    ch1_p=data["ch1_power"],
+                )
+                self._sensor_status["ina3221"]["ok"] = True
             else:
                 self._sensor_status["ina3221"]["ok"] = False
+        except Exception as e:
+            self._sensor_status["ina3221"]["last_error"] = str(e)
+            logger.exception("INA3221 poll error")
 
-            # BME280 — latest reading
-            try:
-                data = bme280_sensor.read()
-                if data is not None:
-                    models.insert_sensor_env(
-                        ts,
-                        temperature=data["temperature"],
-                        humidity=data["humidity"],
-                        pressure=data["pressure"],
-                    )
-                    self._sensor_status["bme280"]["ok"] = True
-                    logger.info("BME280: %.1f°C / %.1f%% / %.1f hPa",
-                                data["temperature"], data["humidity"], data["pressure"])
-                else:
-                    self._sensor_status["bme280"]["ok"] = False
-            except Exception as e:
-                self._sensor_status["bme280"]["last_error"] = str(e)
-                logger.exception("BME280 poll error")
+    def _poll_env(self, now: float):
+        try:
+            data = bme280_sensor.read()
+            if data is not None:
+                ts = _aligned(now, ENV_INTERVAL)
+                models.insert_sensor_env(
+                    ts,
+                    temperature=data["temperature"],
+                    humidity=data["humidity"],
+                    pressure=data["pressure"],
+                )
+                self._sensor_status["bme280"]["ok"] = True
+            else:
+                self._sensor_status["bme280"]["ok"] = False
+        except Exception as e:
+            self._sensor_status["bme280"]["last_error"] = str(e)
+            logger.exception("BME280 poll error")
 
-            # Accelerometer — aggregate buffer
-            if accel_buf:
-                try:
-                    mags = [r["magnitude"] for r in accel_buf]
-                    tilts = [r["tilt"] for r in accel_buf]
-                    xs = [r["x"] for r in accel_buf]
-                    ys = [r["y"] for r in accel_buf]
-                    zs = [r["z"] for r in accel_buf]
-                    n = len(accel_buf)
-                    models.insert_sensor_accel(
-                        ts,
-                        vib_avg=round(sum(mags) / n, 4),
-                        vib_peak=round(max(mags), 4),
-                        tilt_avg=round(sum(tilts) / n, 2),
-                        x_avg=round(sum(xs) / n, 4),
-                        y_avg=round(sum(ys) / n, 4),
-                        z_avg=round(sum(zs) / n, 4),
-                    )
-                    logger.info("LIS2DW12: %d samples, avg_mag=%.4f, peak=%.4f",
-                                n, sum(mags) / n, max(mags))
-                except Exception:
-                    logger.exception("Accelerometer aggregation error")
-                accel_buf = []
-
-            # Final drain of lightning events
-            self._store_lightning_events()
+    def _poll_accel(self, now: float):
+        try:
+            data = lis2dw12_sensor.read()
+            if data is not None:
+                ts = _aligned(now, ACCEL_INTERVAL)
+                models.insert_sensor_accel(
+                    ts,
+                    vib_avg=data["magnitude"],
+                    vib_peak=data["magnitude"],
+                    tilt_avg=data["tilt"],
+                    x_avg=data["x"],
+                    y_avg=data["y"],
+                    z_avg=data["z"],
+                )
+                self._sensor_status["lis2dw12"]["ok"] = True
+            else:
+                self._sensor_status["lis2dw12"]["ok"] = False
+        except Exception as e:
+            self._sensor_status["lis2dw12"]["last_error"] = str(e)
+            logger.exception("LIS2DW12 poll error")
 
     def _store_lightning_events(self):
         events = self._as3935.drain_events()
