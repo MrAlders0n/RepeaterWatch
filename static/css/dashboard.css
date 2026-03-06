@@ -380,6 +380,13 @@ td.dir-rx { color: var(--green); }
     padding: 16px 20px 0;
 }
 
+.sensor-status-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 12px;
+    padding: 16px 20px 0;
+}
+
 .status-card {
     flex: 1 1 140px;
     background: var(--bg-card);
@@ -1198,6 +1205,10 @@ footer strong {
 
     .status-grid {
         padding: 12px 12px 0;
+    }
+
+    .sensor-status-grid {
+        grid-template-columns: repeat(2, 1fr);
     }
 
     .pi-time-controls,
