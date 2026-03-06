@@ -221,7 +221,21 @@ var SensorCharts = (function () {
         charts.battVolt.setOption({ series: [{ data: _ts2data(data.timestamps, data.ch0_voltage) }] });
         charts.battCurr.setOption({ series: [{ data: _ts2data(data.timestamps, data.ch0_current) }] });
         charts.loadVolt.setOption({ series: [{ data: _ts2data(data.timestamps, data.ch1_voltage) }] });
-        charts.loadCurr.setOption({ series: [{ data: _ts2data(data.timestamps, data.ch1_current) }] });
+        var loadCurrData = _ts2data(data.timestamps, data.ch1_current);
+        var loadCurrSum = 0, loadCurrCnt = 0;
+        for (var i = 0; i < data.ch1_current.length; i++) {
+            if (data.ch1_current[i] != null) { loadCurrSum += data.ch1_current[i]; loadCurrCnt++; }
+        }
+        var loadCurrAvg = loadCurrCnt ? loadCurrSum / loadCurrCnt : 0;
+        charts.loadCurr.setOption({ series: [{
+            data: loadCurrData,
+            markLine: {
+                silent: true,
+                symbol: 'none',
+                label: { formatter: 'Avg: {c} mA', color: '#aaa', fontSize: 10 },
+                data: [{ yAxis: Math.round(loadCurrAvg * 100) / 100, lineStyle: { color: '#ffd166', type: 'dashed', width: 1.5 } }],
+            },
+        }] });
         if (charts.solarVolt && data.ch2_voltage) {
             charts.solarVolt.setOption({ series: [{ data: _ts2data(data.timestamps, data.ch2_voltage) }] });
         }
