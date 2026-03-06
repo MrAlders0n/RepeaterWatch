@@ -384,7 +384,7 @@ td.dir-rx { color: var(--green); }
     display: grid;
     grid-template-columns: repeat(6, 1fr);
     gap: 12px;
-    padding: 16px 20px 0;
+    padding: 12px 20px 0;
 }
 
 .status-card {

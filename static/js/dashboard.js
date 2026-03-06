@@ -237,8 +237,10 @@
         var v = d.ch0_voltage[last];
         var i0 = d.ch0_current[last];
         var i1 = d.ch1_current[last];
+        var v1 = d.ch1_voltage[last];
         document.getElementById('sensor-batt-v').textContent = v != null ? v.toFixed(3) + ' V' : '--';
         document.getElementById('sensor-batt-i').textContent = i0 != null ? i0.toFixed(1) : '--';
+        document.getElementById('sensor-load-v').textContent = v1 != null ? v1.toFixed(3) + ' V' : '--';
         document.getElementById('sensor-load-i').textContent = i1 != null ? i1.toFixed(1) : '--';
 
         var sv = d.ch2_voltage ? d.ch2_voltage[last] : null;

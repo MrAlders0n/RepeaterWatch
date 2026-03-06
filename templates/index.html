@@ -292,7 +292,7 @@
             <span id="sensor-last-update">--</span>
         </nav>
 
-        <!-- Sensor Status Cards -->
+        <!-- Sensor Status Cards — Power Row -->
         <div class="status-grid sensor-status-grid">
             <div class="status-card">
                 <span class="status-label">Battery V</span>
@@ -303,6 +303,11 @@
                 <span class="status-label">Battery mA</span>
                 <span class="status-value" id="sensor-batt-i">--</span>
                 <span class="status-sub" id="sensor-batt-i-sub">Ch0 current</span>
+            </div>
+            <div class="status-card">
+                <span class="status-label">Load V</span>
+                <span class="status-value" id="sensor-load-v">--</span>
+                <span class="status-sub" id="sensor-load-v-sub">Ch1 voltage</span>
             </div>
             <div class="status-card">
                 <span class="status-label">Load mA</span>
@@ -319,6 +324,9 @@
                 <span class="status-value" id="sensor-solar-i">--</span>
                 <span class="status-sub" id="sensor-solar-i-sub">Ch2 current</span>
             </div>
+        </div>
+        <!-- Sensor Status Cards — Environment & Charger Row -->
+        <div class="status-grid sensor-status-grid">
             <div class="status-card">
                 <span class="status-label">Charging</span>
                 <span class="status-value" id="sensor-chg-val">--</span>
