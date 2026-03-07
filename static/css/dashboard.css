@@ -688,6 +688,24 @@ td.dir-rx { color: var(--green); }
     border-color: var(--accent);
 }
 
+.bq24074-indicators {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.bq24074-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    background: var(--bg-chart);
+    border: 1px solid var(--border);
+    font-size: 0.85rem;
+    color: var(--text);
+}
+
 .radio-control-btns {
     display: flex;
     gap: 10px;
