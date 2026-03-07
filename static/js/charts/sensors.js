@@ -90,16 +90,16 @@ var SensorCharts = (function () {
             { name: 'Avg mA', color: '#ffd166' },
         ]));
 
-        // Charge Voltage (Ch2)
+        // Input Voltage (Ch2)
         charts.solarVolt = echarts.init(elements.solarVolt);
         charts.solarVolt.setOption(makeOption('V', [
-            { name: 'Charge V', color: '#f4a261', area: 'rgba(244,162,97,0.1)' },
+            { name: 'Input V', color: '#f4a261', area: 'rgba(244,162,97,0.1)' },
         ]));
 
-        // Charge Current (Ch2)
+        // Input Current (Ch2)
         charts.solarCurr = echarts.init(elements.solarCurr);
         charts.solarCurr.setOption(makeOption('mA', [
-            { name: 'Charge mA', color: '#e76f51' },
+            { name: 'Input mA', color: '#e76f51' },
         ]));
 
         // Power (W)
@@ -108,7 +108,7 @@ var SensorCharts = (function () {
             charts.power.setOption(makeOption('W', [
                 { name: 'Battery W', color: '#06d6a0' },
                 { name: 'Load W', color: '#ef476f' },
-                { name: 'Charge W', color: '#f4a261' },
+                { name: 'Input W', color: '#f4a261' },
             ]));
         }
 

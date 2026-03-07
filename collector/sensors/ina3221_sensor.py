@@ -43,8 +43,8 @@ def read() -> dict | None:
             ch2_i = ina[2].current
             return {
                 "ch0_voltage": round(ch0_v, 4),
-                "ch0_current": round(-ch0_i, 2),
-                "ch0_power": round(-ch0_v * ch0_i, 2),
+                "ch0_current": round(ch0_i, 2),
+                "ch0_power": round(ch0_v * ch0_i, 2),
                 "ch1_voltage": round(ch1_v, 4),
                 "ch1_current": round(ch1_i, 2),
                 "ch1_power": round(ch1_v * ch1_i, 2),
