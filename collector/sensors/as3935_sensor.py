@@ -86,10 +86,11 @@ class AS3935:
             self._configure()
             self._setup_irq()
             self._available = True
-            logger.info("AS3935 initialized — GPIO%d, cap=%dpF, mode=%s, noise=%d, watchdog=%d, spike=%d, gpio_lib=%s",
+            logger.info("AS3935 initialized — GPIO%d, cap=%dpF, mode=%s, noise=%d, watchdog=%d, spike=%d, min_strikes=%d, min_dist=%dkm, gpio_lib=%s",
                         self._irq_gpio, CAPACITANCE, config.AS3935_AFE_MODE,
                         config.AS3935_NOISE_FLOOR, config.AS3935_WATCHDOG,
-                        config.AS3935_SPIKE_REJECTION, _GPIO_LIB)
+                        config.AS3935_SPIKE_REJECTION, config.AS3935_MIN_STRIKES,
+                        config.AS3935_MIN_DISTANCE, _GPIO_LIB)
             return True
         except Exception:
             logger.exception("AS3935 init failed")
@@ -145,6 +146,12 @@ class AS3935:
         # Spike rejection (bits [3:0] in reg2)
         self._sing_reg_write(_REG_CONFIG2, 0x0F, config.AS3935_SPIKE_REJECTION)
 
+        # Minimum number of lightning strikes before interrupt (bits [5:4] in reg2)
+        # 0=1, 1=5, 2=9, 3=16
+        min_ligh_map = {1: 0, 5: 1, 9: 2, 16: 3}
+        min_ligh_bits = min_ligh_map.get(config.AS3935_MIN_STRIKES, 1)  # default 5
+        self._sing_reg_write(_REG_CONFIG2, 0x30, min_ligh_bits << 4)
+
         # Calibrate RCO
         self._write_reg(_REG_CALIB, 0x96)
         time.sleep(0.002)
@@ -188,14 +195,21 @@ class AS3935:
             }
 
             if int_src == INT_LIGHTNING:
-                event["event_type"] = 1
                 distance = self._read_reg(_REG_DISTANCE) & 0x3F
-                event["distance_km"] = distance if distance != 0x3F else None
-
                 e0 = self._read_reg(_REG_ENERGY0)
                 e1 = self._read_reg(_REG_ENERGY1)
                 e2 = self._read_reg(_REG_ENERGY2) & 0x1F
-                event["energy"] = (e2 << 16) | (e1 << 8) | e0
+                energy = (e2 << 16) | (e1 << 8) | e0
+
+                # Filter likely false positives by minimum distance
+                if distance != 0x3F and distance < config.AS3935_MIN_DISTANCE:
+                    logger.debug("AS3935 strike filtered: distance=%d km < min %d km, energy=%d",
+                                 distance, config.AS3935_MIN_DISTANCE, energy)
+                    return
+
+                event["event_type"] = 1
+                event["distance_km"] = distance if distance != 0x3F else None
+                event["energy"] = energy
 
                 logger.info("Lightning detected: distance=%s km, energy=%s",
                             event["distance_km"], event["energy"])
