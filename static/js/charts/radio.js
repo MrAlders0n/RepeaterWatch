@@ -25,7 +25,7 @@ var RadioChart = (function () {
             ],
             series: [
                 { name: 'Noise Floor', type: 'line', smooth: true, symbol: 'none', yAxisIndex: 0, lineStyle: { width: 2, color: '#ffd166' }, itemStyle: { color: '#ffd166' }, areaStyle: { opacity: 0.1, color: '#ffd166' }, data: [] },
-                { name: 'Noise Floor (AVG)', type: 'line', symbol: 'none', yAxisIndex: 0, lineStyle: { width: 2, type: 'dashed', color: '#ffe0a0' }, itemStyle: { color: '#ffe0a0' }, data: [] },
+                { name: 'Noise Floor (AVG)', type: 'line', symbol: 'none', yAxisIndex: 0, lineStyle: { width: 2, color: '#ffe0a0' }, itemStyle: { color: '#ffe0a0' }, data: [] },
                 { name: 'Last RSSI', type: 'line', smooth: true, symbol: 'none', yAxisIndex: 0, lineStyle: { width: 2, color: '#ef476f' }, itemStyle: { color: '#ef476f' }, data: [] },
                 { name: 'Last SNR', type: 'line', smooth: true, symbol: 'none', yAxisIndex: 1, lineStyle: { width: 2, color: '#06d6a0' }, itemStyle: { color: '#06d6a0' }, data: [] },
             ],
@@ -37,7 +37,7 @@ var RadioChart = (function () {
     function update(data) {
         if (!chart) return;
         var nf = [], rssi = [], snr = [];
-        var WINDOW = 5 * 60 * 1000; // 5 minutes in ms
+        var WINDOW = 30 * 60 * 1000; // 30 minutes in ms
         for (var i = 0; i < data.timestamps.length; i++) {
             var t = data.timestamps[i] * 1000;
             nf.push([t, data.noise_floor[i]]);
