@@ -37,18 +37,21 @@ var RadioChart = (function () {
     function update(data) {
         if (!chart) return;
         var nf = [], rssi = [], snr = [];
-        var nfSum = 0, nfCount = 0;
+        var WINDOW = 5 * 60 * 1000; // 5 minutes in ms
         for (var i = 0; i < data.timestamps.length; i++) {
             var t = data.timestamps[i] * 1000;
             nf.push([t, data.noise_floor[i]]);
             rssi.push([t, data.last_rssi[i]]);
             snr.push([t, data.last_snr[i]]);
-            if (data.noise_floor[i] != null) { nfSum += data.noise_floor[i]; nfCount++; }
         }
+        // Compute 5-minute rolling average for noise floor
         var nfAvg = [];
-        if (nfCount > 0 && nf.length > 0) {
-            var avg = nfSum / nfCount;
-            nfAvg = [[nf[0][0], avg], [nf[nf.length - 1][0], avg]];
+        for (var i = 0; i < nf.length; i++) {
+            var sum = 0, count = 0;
+            for (var j = i; j >= 0 && nf[i][0] - nf[j][0] <= WINDOW; j--) {
+                if (nf[j][1] != null) { sum += nf[j][1]; count++; }
+            }
+            nfAvg.push([nf[i][0], count > 0 ? sum / count : null]);
         }
         chart.setOption({ series: [{ data: nf }, { data: nfAvg }, { data: rssi }, { data: snr }] });
     }
