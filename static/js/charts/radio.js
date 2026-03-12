@@ -10,7 +10,7 @@ var RadioChart = (function () {
             backgroundColor: 'transparent',
             tooltip: TT,
             legend: {
-                data: ['Noise Floor', 'Last RSSI', 'Last SNR'],
+                data: ['Noise Floor', 'Noise Floor (AVG)', 'Last RSSI', 'Last SNR'],
                 textStyle: { fontSize: 11, color: '#aaa' },
                 top: 0,
             },
@@ -25,6 +25,7 @@ var RadioChart = (function () {
             ],
             series: [
                 { name: 'Noise Floor', type: 'line', smooth: true, symbol: 'none', yAxisIndex: 0, lineStyle: { width: 2, color: '#ffd166' }, itemStyle: { color: '#ffd166' }, areaStyle: { opacity: 0.1, color: '#ffd166' }, data: [] },
+                { name: 'Noise Floor (AVG)', type: 'line', symbol: 'none', yAxisIndex: 0, lineStyle: { width: 2, type: 'dashed', color: '#ffe0a0' }, itemStyle: { color: '#ffe0a0' }, data: [] },
                 { name: 'Last RSSI', type: 'line', smooth: true, symbol: 'none', yAxisIndex: 0, lineStyle: { width: 2, color: '#ef476f' }, itemStyle: { color: '#ef476f' }, data: [] },
                 { name: 'Last SNR', type: 'line', smooth: true, symbol: 'none', yAxisIndex: 1, lineStyle: { width: 2, color: '#06d6a0' }, itemStyle: { color: '#06d6a0' }, data: [] },
             ],
@@ -36,13 +37,20 @@ var RadioChart = (function () {
     function update(data) {
         if (!chart) return;
         var nf = [], rssi = [], snr = [];
+        var nfSum = 0, nfCount = 0;
         for (var i = 0; i < data.timestamps.length; i++) {
             var t = data.timestamps[i] * 1000;
             nf.push([t, data.noise_floor[i]]);
             rssi.push([t, data.last_rssi[i]]);
             snr.push([t, data.last_snr[i]]);
+            if (data.noise_floor[i] != null) { nfSum += data.noise_floor[i]; nfCount++; }
         }
-        chart.setOption({ series: [{ data: nf }, { data: rssi }, { data: snr }] });
+        var nfAvg = [];
+        if (nfCount > 0 && nf.length > 0) {
+            var avg = nfSum / nfCount;
+            nfAvg = [[nf[0][0], avg], [nf[nf.length - 1][0], avg]];
+        }
+        chart.setOption({ series: [{ data: nf }, { data: nfAvg }, { data: rssi }, { data: snr }] });
     }
 
     return { init: init, update: update, resize: function () { if (chart) chart.resize(); } };
