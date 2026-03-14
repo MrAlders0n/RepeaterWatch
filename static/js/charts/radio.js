@@ -51,7 +51,7 @@ var RadioChart = (function () {
             for (var j = i; j >= 0 && nf[i][0] - nf[j][0] <= WINDOW; j--) {
                 if (nf[j][1] != null) { sum += nf[j][1]; count++; }
             }
-            nfAvg.push([nf[i][0], count > 0 ? sum / count : null]);
+            nfAvg.push([nf[i][0], count > 0 ? Math.round(sum / count) : null]);
         }
         chart.setOption({ series: [{ data: nf }, { data: nfAvg }, { data: rssi }, { data: snr }] });
     }
